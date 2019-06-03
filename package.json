@@ -9,7 +9,7 @@
     "private": false,
     "scripts": {
         "test": "jest",
-        "test:watch": "jest --watch"
+        "test:watch": "npm test -- --watch"
     },
     "devDependencies": {
         "@babel/cli": "^7.4.4",
@@ -24,6 +24,7 @@
     "dependencies": {
         "axios": "^0.19.0",
         "commander": "^2.20.0",
+        "csv-parser": "^2.3.0",
         "dotenv": "^8.0.0",
         "ora": "^3.4.0"
     }
