@@ -1,9 +1,11 @@
+import "../config/global.config";
+
 import axios from "axios";
 
 const $http = axios.create({
-    baseURL: process.env.SG_URL || "",
+    baseURL: process.env.SG_URL,
     headers: {
-        Authentication: `Bearer ${process.env.SG_KEY}`,
+        Authorization: `Bearer ${process.env.SG_KEY}`,
         Aceept: "application/json",
         "Content-Type": "application/json",
     },
