@@ -1,12 +1,14 @@
 import $http from "./http.service";
 
+const basePath = "/contactdb/recipients";
+
 const fetch = email =>
     new Promise((resolve, reject) => {
         if (email) {
             const options = { params: { email } };
 
             return $http
-                .get("/contactdb/recipients/search", options)
+                .get(`${basePath}/search`, options)
                 .then(raw => raw.data)
                 .then(response => {
                     if (response) return response;
@@ -27,7 +29,7 @@ const fetch = email =>
 
 const check = email =>
     new Promise((resolve, reject) => {
-        fetch(email)
+        return fetch(email)
             .then(contact => {
                 if (Object.keys(contact).includes("id")) resolve(true);
                 resolve(false);
@@ -35,7 +37,7 @@ const check = email =>
             .catch(reject);
     });
 
-const create = () => {};
+const create = payload => $http.post(basePath, payload);
 
 const remove = () => {};
 
