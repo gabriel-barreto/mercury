@@ -139,7 +139,7 @@ describe("Contacts Service", () => {
 
         beforeEach(() => {
             httpStub = sinon.stub($http, "post");
-            httpStub.resolves({});
+            httpStub.resolves({ data: { persisted_recipients: [] } });
         });
 
         afterEach(() => {
@@ -147,16 +147,63 @@ describe("Contacts Service", () => {
         });
 
         it("should call post method from HTTP", () => {
-            $contacts.create({});
+            $contacts.create({ first_name: "a", last_name: "b", email: "c" });
             expect(httpStub).to.have.been.calledOnce;
+        });
+
+        it("shouldn't call post method from HTTP without payload", () => {
+            $contacts.create({});
+            expect(httpStub).to.not.have.been.called;
+        });
+
+        it("shouldn't call post method with empty props", () => {
+            $contacts.create({});
+            expect(httpStub).to.not.have.been.called;
         });
 
         it("should call post method with correct params", () => {
             const url = "/contactdb/recipients";
-            const data = contactData;
+            const data = [contactData];
 
-            $contacts.create(data);
+            $contacts.create(contactData);
             expect(httpStub).to.have.been.calledWith(url, data);
+        });
+    });
+
+    describe("Remove Method", () => {
+        let httpStub;
+
+        beforeEach(() => {
+            httpStub = sinon.stub($http, "delete");
+            httpStub.resolves({});
+        });
+
+        afterEach(() => {
+            httpStub.restore();
+        });
+
+        it("should call delete method from HTTP", () => {
+            $contacts.remove("abc123");
+            expect(httpStub).to.have.been.calledOnce;
+        });
+
+        it("shouldn't call delete method from HTTP without an ID", () => {
+            $contacts.remove("");
+            expect(httpStub).to.not.have.been.called;
+        });
+
+        it("should return true when get a successful response", async () => {
+            moxios.install($http);
+            moxios.wait(() => {
+                const request = moxios.requests.mostRecent();
+                request.respondWith({ status: 204 });
+            });
+
+            const received = await $contacts.remove("contactId");
+            const expected = true;
+
+            expect(received).to.be.equal(expected);
+            moxios.uninstall($http);
         });
     });
 });

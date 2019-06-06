@@ -37,8 +37,36 @@ const check = email =>
             .catch(reject);
     });
 
-const create = payload => $http.post(basePath, payload);
+const validatePayload = payload => {
+    const required = ["first_name", "last_name", "email"];
+    const found = required.filter(each => payload[each]);
 
-const remove = () => {};
+    return found.length === required.length;
+};
+
+const create = payload =>
+    new Promise((resolve, reject) => {
+        if (validatePayload(payload)) {
+            $http
+                .post(basePath, [payload])
+                .then(response => response.data)
+                .then(({ persisted_recipients }) =>
+                    resolve(persisted_recipients)
+                )
+                .catch(reject);
+        }
+        resolve({});
+    });
+
+const remove = contactId =>
+    new Promise((resolve, reject) => {
+        if (contactId) {
+            return $http
+                .delete(`${basePath}/${contactId}`)
+                .then(() => resolve(true))
+                .catch(reject);
+        }
+        resolve(false);
+    });
 
 export default { fetch, check, create, remove };
