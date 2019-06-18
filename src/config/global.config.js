@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import path from "path";
 
-const envPath = path.resolve(__dirname, path.join("..", "..", ".env"));
+let envPath = path.resolve(__dirname, path.join("..", "..", ".env"));
+if (process.env.NODE_ENV == "production") {
+    envPath = path.resolve(__dirname, path.join("..", ".env"));
+}
 
 dotenv.config({ path: envPath });
