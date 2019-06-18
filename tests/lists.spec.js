@@ -27,6 +27,63 @@ describe("Lists Service", () => {
         });
     });
 
-    describe("Create Method", () => {});
+    describe("Create Method", () => {
+        const data = {};
+
+        describe("Test Params", () => {
+            let httpStub;
+
+            const path = "/contactdb/lists";
+
+            beforeEach(() => {
+                httpStub = sinon.stub($http, "post");
+                httpStub.resolves({ data: {} });
+            });
+
+            afterEach(() => {
+                httpStub.restore();
+            });
+
+            it("should call HTTP Post method", () => {
+                $lists.create(data);
+                expect(httpStub).to.have.been.calledOnce;
+            });
+
+            it("should call HTTP Post method with correct URL", () => {
+                $lists.create(data);
+                expect(httpStub).to.have.been.calledWith(path);
+            });
+
+            it("should call HTTP Post method with correct params", () => {
+                $lists.create(data);
+                expect(httpStub).to.have.been.calledWith(path, data);
+            });
+        });
+
+        describe("Mehtod behavior", () => {
+            beforeEach(() => {
+                moxios.install($http);
+            });
+
+            afterEach(() => {
+                moxios.uninstall($http);
+            });
+
+            it("should return new list ID when receives 201 status", async () => {
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({
+                        status: 201,
+                        response: { id: "abc123", title: "dadsadasd" },
+                    });
+                });
+
+                const expected = "abc123";
+                const received = await $lists.create(data);
+                expect(received).to.be.equal(expected);
+            });
+        });
+    });
+
     describe("Fill Method", () => {});
 });
