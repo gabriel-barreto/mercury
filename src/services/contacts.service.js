@@ -2,6 +2,15 @@ import $http from "./http.service";
 
 const basePath = "/contactdb/recipients";
 
+const fetchAll = (page = 1, pageSize = 1000) =>
+    $http
+        .get(basePath, { params: { page, page_size: pageSize } })
+        .then(({ data }) => data.recipients)
+        .then(found => found.map(each => each.id))
+        .catch(err => {
+            throw err;
+        });
+
 const fetch = email =>
     new Promise((resolve, reject) => {
         if (email) {
@@ -69,4 +78,19 @@ const remove = contactId =>
         resolve(false);
     });
 
-export default { fetch, check, create, remove };
+const removeAll = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const targets = await fetchAll();
+            console.log(targets);
+            const promises = targets.map(each => remove(each));
+
+            Promise.all(promises)
+                .then(resolve)
+                .catch(reject);
+        } catch (ex) {
+            throw ex;
+        }
+    });
+
+export default { fetchAll, fetch, check, create, remove, removeAll };
