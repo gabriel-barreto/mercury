@@ -22,6 +22,11 @@ describe("Contacts Service", () => {
             expect($contacts).to.be.an.instanceOf(Object);
         });
 
+        it("should has a method to get all contacts", () => {
+            expect($contacts.fetchAll).to.exist;
+            expect($contacts.fetchAll).to.be.an.instanceOf(Function);
+        });
+
         it("should has a method to get contact info", () => {
             expect($contacts.fetch).to.exist;
             expect($contacts.fetch).to.be.an.instanceOf(Function);
@@ -40,6 +45,11 @@ describe("Contacts Service", () => {
         it("should has a method to delete contacts", () => {
             expect($contacts.remove).to.exist;
             expect($contacts.remove).to.be.an.instanceOf(Function);
+        });
+
+        it("should has a method to remove all contacts", () => {
+            expect($contacts.removeAll).to.exist;
+            expect($contacts.removeAll).to.be.an.instanceOf(Function);
         });
     });
 
@@ -81,9 +91,58 @@ describe("Contacts Service", () => {
         });
     });
 
-    describe("Check Method", () => {
-        let contactStub;
+    describe("Fetch All Method", () => {
+        let httpStub;
 
+        const path = "/contactdb/recipients";
+        const data = {
+            recipients: [{ id: "asdadasdasda" }, { id: "asdasdaaddada" }],
+        };
+
+        beforeEach(() => {
+            httpStub = sinon.stub($http, "get");
+            httpStub.resolves({ data });
+        });
+
+        afterEach(() => {
+            httpStub.restore();
+        });
+
+        it("should call HTTP Get method", () => {
+            $contacts.fetchAll();
+            expect(httpStub).to.have.been.calledOnce;
+        });
+
+        it("should use default params", () => {
+            const defaultParams = { page: 1, page_size: 1000 };
+            const defaultOptions = { params: defaultParams };
+
+            $contacts.fetchAll();
+            expect(httpStub).to.have.been.calledWith(path, defaultOptions);
+        });
+
+        it("should use passed params", () => {
+            const page = 2;
+            const page_size = 200;
+            const options = { params: { page, page_size } };
+
+            $contacts.fetchAll(page, page_size);
+            expect(httpStub).to.have.been.calledWith(path, options);
+        });
+
+        it("should return just contacts IDs", done => {
+            const expected = data.recipients.map(each => each.id);
+            $contacts
+                .fetchAll()
+                .then(received => {
+                    expect(received).to.be.deep.equal(expected);
+                    done();
+                })
+                .catch(done);
+        });
+    });
+
+    describe("Check Method", () => {
         beforeEach(() => {
             moxios.install($http);
         });
@@ -173,6 +232,10 @@ describe("Contacts Service", () => {
     describe("Remove Method", () => {
         let httpStub;
 
+        beforeAll(() => {
+            moxios.install($http);
+        });
+
         beforeEach(() => {
             httpStub = sinon.stub($http, "delete");
             httpStub.resolves({});
@@ -180,6 +243,10 @@ describe("Contacts Service", () => {
 
         afterEach(() => {
             httpStub.restore();
+        });
+
+        afterAll(() => {
+            moxios.uninstall($http);
         });
 
         it("should call delete method from HTTP", () => {
@@ -193,17 +260,15 @@ describe("Contacts Service", () => {
         });
 
         it("should return true when get a successful response", async () => {
-            moxios.install($http);
+            const received = await $contacts.remove("contactId");
+            const expected = true;
+
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent();
                 request.respondWith({ status: 204 });
             });
 
-            const received = await $contacts.remove("contactId");
-            const expected = true;
-
             expect(received).to.be.equal(expected);
-            moxios.uninstall($http);
         });
     });
 });
