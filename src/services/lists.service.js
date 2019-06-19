@@ -5,7 +5,7 @@ const basePath = "/contactdb/lists";
 const create = listData =>
     $http
         .post(basePath, listData)
-        .then(({ data }) => data.id)
+        .then(({ data = {} }) => data.id || null)
         .catch(err => {
             throw err;
         });
