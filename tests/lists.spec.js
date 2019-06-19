@@ -28,7 +28,7 @@ describe("Lists Service", () => {
     });
 
     describe("Create Method", () => {
-        const data = {};
+        const data = { title: "MyTest" };
         describe("Params", () => {
             let httpStub;
 
@@ -56,6 +56,13 @@ describe("Lists Service", () => {
             it("should call HTTP Post method with correct params", () => {
                 $lists.create(data);
                 expect(httpStub).to.have.been.calledWith(path, data);
+            });
+
+            it("shouldn't call HTTP Post with an incomplete payload", () => {
+                const emptyPayload = {};
+
+                $lists.create(emptyPayload);
+                expect(httpStub).to.not.have.been.called;
             });
         });
         describe("Behavior", () => {
@@ -98,5 +105,7 @@ describe("Lists Service", () => {
         });
     });
 
-    describe("Fill Method", () => {});
+    describe("Fill Method", () => {
+        const targets = [];
+    });
 });
