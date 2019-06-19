@@ -29,8 +29,7 @@ describe("Lists Service", () => {
 
     describe("Create Method", () => {
         const data = {};
-
-        describe("Test Params", () => {
+        describe("Params", () => {
             let httpStub;
 
             const path = "/contactdb/lists";
@@ -59,8 +58,7 @@ describe("Lists Service", () => {
                 expect(httpStub).to.have.been.calledWith(path, data);
             });
         });
-
-        describe("Mehtod behavior", () => {
+        describe("Behavior", () => {
             beforeEach(() => {
                 moxios.install($http);
             });
@@ -69,7 +67,7 @@ describe("Lists Service", () => {
                 moxios.uninstall($http);
             });
 
-            it("should return new list ID when receives 201 status", async () => {
+            it("should return new ID when receives 201 status", async () => {
                 moxios.wait(() => {
                     const request = moxios.requests.mostRecent();
                     request.respondWith({
@@ -81,6 +79,21 @@ describe("Lists Service", () => {
                 const expected = "abc123";
                 const received = await $lists.create(data);
                 expect(received).to.be.equal(expected);
+            });
+
+            it("should return null when no receives a 201 status", async () => {
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    const status = [400, 404, 500];
+                    const index = Math.floor(Math.random() * 2);
+                    request.respondWith({
+                        stauts: status[index],
+                    });
+                });
+
+                const expected = null;
+                const received = await $lists.create(data);
+                expect(expected).to.be.equal(received);
             });
         });
     });
