@@ -1,6 +1,8 @@
 import $http from "./http.service";
+import validator from "../utils/validator";
 
 const basePath = "/contactdb/recipients";
+const _required = ["first_name", "last_name", "email"];
 
 const fetchAll = (page = 1, pageSize = 1000) =>
     $http
@@ -46,16 +48,9 @@ const check = email =>
             .catch(reject);
     });
 
-const validatePayload = payload => {
-    const required = ["first_name", "last_name", "email"];
-    const found = required.filter(each => payload[each]);
-
-    return found.length === required.length;
-};
-
 const create = payload =>
     new Promise((resolve, reject) => {
-        if (validatePayload(payload)) {
+        if (validator.validate(_required, payload)) {
             $http
                 .post(basePath, [payload])
                 .then(response => response.data)
@@ -82,7 +77,6 @@ const removeAll = () =>
     new Promise(async (resolve, reject) => {
         try {
             const targets = await fetchAll();
-            console.log(targets);
             const promises = targets.map(each => remove(each));
 
             Promise.all(promises)
