@@ -15,6 +15,23 @@ const create = listData =>
         resolve(null);
     });
 
-const fill = () => {};
+const fill = (listId, targets) => {
+    if (!listId) return;
+    else if (!targets) return;
+
+    if (!(typeof listId == "number"))
+        throw new Error("listId should be a number");
+    else if (!(targets instanceof Array))
+        throw new Error("targets should be an array of contact ids");
+
+    if (targets.length < 1) return;
+
+    return new Promise((resolve, reject) => {
+        return $http
+            .post(`${basePath}/${listId}/recipients`, targets)
+            .then(resolve)
+            .catch(reject);
+    });
+};
 
 export default { create, fill };
