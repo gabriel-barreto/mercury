@@ -163,6 +163,36 @@ describe("Lists Service", () => {
             });
         });
 
-        describe("Behavior", () => {});
+        describe("Behavior", () => {
+            beforeEach(() => {
+                moxios.install($http);
+            });
+
+            afterEach(() => {
+                moxios.uninstall($http);
+            });
+
+            it("should return true when success request", async () => {
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({ status: 201, response: { a: 1 } });
+                });
+
+                const received = await $lists.fill(target, targets);
+                expect(received).to.be.equal(true);
+            });
+
+            it("should return false when fail request", async () => {
+                const failStatus = [400, 401, 404];
+                const index = Math.floor(Math.random() * 2);
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({ status: failStatus[index] });
+                });
+
+                const received = await $lists.fill(target, targets);
+                expect(received).to.be.equal(false);
+            });
+        });
     });
 });
