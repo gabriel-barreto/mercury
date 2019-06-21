@@ -10,6 +10,8 @@ import $lists from "../src/services/lists.service";
 chai.use(sinonChai);
 
 describe("Lists Service", () => {
+    const path = "/contactdb/lists";
+
     describe("Smoke Tests", () => {
         it("should exist an be an object", () => {
             expect($lists).to.exist;
@@ -31,8 +33,6 @@ describe("Lists Service", () => {
         const data = { title: "MyTest" };
         describe("Params", () => {
             let httpStub;
-
-            const path = "/contactdb/lists";
 
             beforeEach(() => {
                 httpStub = sinon.stub($http, "post");
@@ -106,6 +106,63 @@ describe("Lists Service", () => {
     });
 
     describe("Fill Method", () => {
-        const targets = [];
+        const targets = ["abc123"];
+        const target = 123;
+
+        describe("Params", () => {
+            let httpStub;
+
+            beforeEach(() => {
+                httpStub = sinon.stub($http, "post");
+                httpStub.resolves({});
+            });
+
+            afterEach(() => {
+                httpStub.restore();
+            });
+
+            it("should call HTTP Post method", () => {
+                $lists.fill(target, targets);
+                expect(httpStub).to.have.been.calledOnce;
+            });
+
+            it("should call HTTP Post method with correct URL", () => {
+                const expectedUrl = `${path}/${target}/recipients`;
+                $lists.fill(target, targets);
+                expect(httpStub).to.have.been.calledWith(expectedUrl);
+            });
+
+            it("should call HTTP Post method with correct body", () => {
+                const expectedUrl = `${path}/${target}/recipients`;
+                $lists.fill(target, targets);
+                expect(httpStub).to.have.been.calledWith(expectedUrl, targets);
+            });
+
+            it("shouldn't call HTTP Post method without an listId", () => {
+                $lists.fill(undefined, []);
+                expect(httpStub).to.not.have.been.called;
+            });
+
+            it("shouldn't call HTTP Post method without a target at least", () => {
+                $lists.fill(target, []);
+                expect(httpStub).to.not.have.been.called;
+            });
+
+            it("should throw an error if id isn't an int", () => {
+                const expected = "should be a number";
+
+                expect(() => $lists.fill(true, [])).to.throws(Error);
+                expect(() => $lists.fill(true, [])).to.throws(expected);
+            });
+
+            it("should throw an error if targets isn't an array", () => {
+                const expected = "should be an array";
+
+                expect(() => $lists.fill(123, "aa")).to.throws(Error);
+                expect(() => $lists.fill(123, "aa")).to.throws(expected);
+            });
+        });
+
+        describe("Behavior", () => {});
     });
 });
