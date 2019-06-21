@@ -26,11 +26,11 @@ const fill = (listId, targets) => {
 
     if (targets.length < 1) return;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
         return $http
             .post(`${basePath}/${listId}/recipients`, targets)
-            .then(resolve)
-            .catch(reject);
+            .then(_ => resolve(true))
+            .catch(_ => resolve(false));
     });
 };
 
