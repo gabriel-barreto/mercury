@@ -260,13 +260,13 @@ describe("Contacts Service", () => {
         });
 
         it("should return true when get a successful response", async () => {
-            const received = await $contacts.remove("contactId");
-            const expected = true;
-
             moxios.wait(() => {
                 const request = moxios.requests.mostRecent();
                 request.respondWith({ status: 204 });
             });
+
+            const received = await $contacts.remove("contactId");
+            const expected = true;
 
             expect(received).to.be.equal(expected);
         });
