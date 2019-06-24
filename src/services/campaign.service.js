@@ -1,7 +1,7 @@
 import $http from "./http.service";
 import validator from "../utils/validator";
 
-const basePath = "/campaign";
+const basePath = "/campaigns";
 const _required = [
     "title",
     "subject",
@@ -21,6 +21,15 @@ const create = payload =>
             .then(resolve)
             .catch(reject);
     });
-const shoot = () => {};
+
+const shoot = campaignId =>
+    new Promise((resolve, reject) => {
+        if (!campaignId) return reject(false);
+
+        return $http
+            .post(`${basePath}/${campaignId}/schedules/now`)
+            .then(() => resolve(true))
+            .catch(() => resolve(false));
+    });
 
 export default { create, shoot };
