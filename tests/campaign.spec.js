@@ -29,7 +29,7 @@ describe("Campaigns Methods", () => {
     describe("Create Method", () => {
         let httpStub;
 
-        const path = `/campaign`;
+        const path = `/campaigns`;
         const payload = {
             title: "Lorem",
             subject: "a",
@@ -112,6 +112,79 @@ describe("Campaigns Methods", () => {
                 const received = await $campaign.create(payload);
                 const expected = null;
 
+                expect(received).to.be.equal(expected);
+            });
+        });
+    });
+
+    describe("Shoot Mehtod", () => {
+        const id = 1234;
+
+        describe("Param", () => {
+            let httpStub;
+
+            beforeEach(() => {
+                httpStub = sinon.stub($http, "post");
+                httpStub.resolves({ data: {} });
+            });
+
+            afterEach(() => {
+                httpStub.restore();
+            });
+
+            it("should use HTTP Post method to send campaigns", () => {
+                $campaign.shoot(id);
+                expect(httpStub).to.have.been.calledOnce;
+            });
+
+            it("should call HTTP Post method with correct URL", () => {
+                const expected = `/campaigns/${id}/schedules/now`;
+
+                $campaign.shoot(id);
+                expect(httpStub).to.have.been.calledWith(expected);
+            });
+
+            it("shouldn't call HTTP Post method without an ID", () => {
+                $campaign.shoot(undefined).catch(() => {});
+                expect(httpStub).to.not.have.been.called;
+            });
+        });
+
+        describe("Behavior", () => {
+            beforeEach(() => {
+                moxios.install($http);
+            });
+
+            afterEach(() => {
+                moxios.uninstall($http);
+            });
+
+            it("should return true when success response", async () => {
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({ status: 200, response: {} });
+                });
+
+                const received = await $campaign.shoot(id);
+                const expected = true;
+
+                expect(received).to.be.equal(expected);
+            });
+
+            it("should return false when fail response", async () => {
+                const status = [400, 401, 403, 404, 500];
+                const index = Math.floor(Math.random() * 4);
+                const payload = { status: status[index] };
+
+                moxios.wait(function() {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith(payload);
+                });
+
+                const received = await $campaign.shoot(id);
+                const expected = false;
+
+                console.log(received);
                 expect(received).to.be.equal(expected);
             });
         });
