@@ -17,6 +17,7 @@ const create = payload =>
         else if (!validator.validate(_required, payload)) return reject(false);
         return $http
             .post(basePath, payload)
+            .then(({ data }) => data.id || null)
             .then(resolve)
             .catch(reject);
     });
