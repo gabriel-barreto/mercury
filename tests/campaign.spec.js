@@ -1,4 +1,5 @@
 import chai, { expect } from "chai";
+import moxios from "moxios";
 import sinon from "sinon";
 import sinonChai from "sinon-chai";
 
@@ -38,38 +39,81 @@ describe("Campaigns Methods", () => {
             html_content: "a",
         };
 
-        beforeEach(() => {
-            httpStub = sinon.stub($http, "post");
-            httpStub.resolves({});
+        describe("Params", () => {
+            beforeEach(() => {
+                httpStub = sinon.stub($http, "post");
+                httpStub.resolves({ data: { id: 1 } });
+            });
+
+            afterEach(() => {
+                httpStub.restore();
+            });
+
+            it("should call HTTP Post method", () => {
+                $campaign.create(payload);
+                expect(httpStub).to.have.been.calledOnce;
+            });
+
+            it("should call HTTP Post method with correct URL", () => {
+                $campaign.create(payload);
+                expect(httpStub).to.have.been.calledWith(path);
+            });
+
+            it("should call HTTP Post method with correct payload", () => {
+                $campaign.create(payload);
+                expect(httpStub).to.have.been.calledWith(path, payload);
+            });
+
+            it("shouldn't call HTTP Post method without payload", () => {
+                $campaign.create().catch(() => {});
+                expect(httpStub).to.not.have.been.called;
+            });
+
+            it("shouldn't call HTTP Post method with an invalid payload", () => {
+                $campaign.create({ title: "a" }).catch(() => {});
+                expect(httpStub).to.not.have.been.called;
+            });
         });
 
-        afterEach(() => {
-            httpStub.restore();
-        });
+        describe("Behavior", () => {
+            beforeEach(() => {
+                moxios.install($http);
+            });
 
-        it("should call HTTP Post method", () => {
-            $campaign.create(payload);
-            expect(httpStub).to.have.been.calledOnce;
-        });
+            afterEach(() => {
+                moxios.uninstall($http);
+            });
 
-        it("should call HTTP Post method with correct URL", () => {
-            $campaign.create(payload);
-            expect(httpStub).to.have.been.calledWith(path);
-        });
+            it("should return ID when success response", async () => {
+                const id = 123;
 
-        it("should call HTTP Post method with correct payload", () => {
-            $campaign.create(payload);
-            expect(httpStub).to.have.been.calledWith(path, payload);
-        });
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({ status: 201, response: { id } });
+                });
 
-        it("shouldn't call HTTP Post method without payload", () => {
-            $campaign.create().catch(() => {});
-            expect(httpStub).to.not.have.been.called;
-        });
+                const received = await $campaign.create(payload);
 
-        it("shouldn't call HTTP Post method with an invalid payload", () => {
-            $campaign.create({ title: "a" }).catch(() => {});
-            expect(httpStub).to.not.have.been.called;
+                expect(received).to.be.equal(id);
+            });
+
+            it("should return null when fails", async () => {
+                const status = [400, 401, 404, 500];
+                const index = Math.floor(Math.random() * 3);
+
+                moxios.wait(() => {
+                    const request = moxios.requests.mostRecent();
+                    request.respondWith({
+                        stauts: status[index],
+                        response: {},
+                    });
+                });
+
+                const received = await $campaign.create(payload);
+                const expected = null;
+
+                expect(received).to.be.equal(expected);
+            });
         });
     });
 });
