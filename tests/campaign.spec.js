@@ -29,6 +29,14 @@ describe("Campaigns Methods", () => {
         let httpStub;
 
         const path = `/campaign`;
+        const payload = {
+            title: "Lorem",
+            subject: "a",
+            list_ids: [1],
+            sender_id: 123,
+            categories: ["tag"],
+            html_content: "a",
+        };
 
         beforeEach(() => {
             httpStub = sinon.stub($http, "post");
@@ -40,13 +48,28 @@ describe("Campaigns Methods", () => {
         });
 
         it("should call HTTP Post method", () => {
-            $campaign.create();
+            $campaign.create(payload);
             expect(httpStub).to.have.been.calledOnce;
         });
 
         it("should call HTTP Post method with correct URL", () => {
-            $campaign.create();
+            $campaign.create(payload);
             expect(httpStub).to.have.been.calledWith(path);
+        });
+
+        it("should call HTTP Post method with correct payload", () => {
+            $campaign.create(payload);
+            expect(httpStub).to.have.been.calledWith(path, payload);
+        });
+
+        it("shouldn't call HTTP Post method without payload", () => {
+            $campaign.create().catch(() => {});
+            expect(httpStub).to.not.have.been.called;
+        });
+
+        it("shouldn't call HTTP Post method with an invalid payload", () => {
+            $campaign.create({ title: "a" }).catch(() => {});
+            expect(httpStub).to.not.have.been.called;
         });
     });
 });
