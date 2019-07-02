@@ -1,6 +1,5 @@
 import csvParser from "csv-parser";
 import fs from "fs";
-import { promisify } from "util";
 
 const mapperOptions = { skipLines: 1, headers: ["name", "email"] };
 
@@ -23,4 +22,21 @@ const read = filepath =>
             .on("error", reject);
     });
 
-module.exports = { read };
+const segment = items => {
+    let offset = 0;
+    let limit = 0;
+
+    const slices = [];
+
+    while (limit < items.length) {
+        if (limit + 1000 < items.length) limit += 1000;
+        else limit = items.length;
+
+        slices.push(items.slice(offset, limit));
+        offset = limit;
+    }
+
+    return slices;
+};
+
+export default { read, segment };
